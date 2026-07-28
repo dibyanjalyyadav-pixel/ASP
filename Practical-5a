@@ -1,4 +1,4 @@
-
+------------------------------PRACTICAL--5(A)----------------------------------
 webform1.aspx.cs
 using System;
 using System.Collections.Generic;
@@ -60,5 +60,155 @@ namespace pract5
     }
 }
 
+-----------------------------------PRACTICAL--5(B)------------------------------------
+\\Product.cs \\
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public int Price { get; set; }
+}
 
+\\AppDbContext.cs \\
+using Microsoft.EntityFrameworkCore;
+using ProductEFCore.Models;
+
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+    : base(options)
+    {
+    }
+
+    public DbSet<Product> Products { get; set; }
+}
+
+\\Program.cs\\
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+options.UseSqlServer(
+builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var app = builder.Build();
+
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.MapControllerRoute(
+name: "default",
+pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
+
+\\HomeController.cs\\
+using Microsoft.AspNetCore.Mvc;
+using ProductEFCore.Models;
+
+public class HomeController : Controller
+{
+    private readonly AppDbContext _context;
+
+    public HomeController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public IActionResult Index()
+    {
+        Product p = new Product();
+
+        p.Name = "Laptop";
+        p.Price = 50000;
+
+        _context.Products.Add(p);
+        _context.SaveChanges();
+
+        return Content("Product Inserted Successfully");
+    }
+}
+--------------------------------PRACTICAL--5(C)-----------------------------
+\\Program.cs\\
+using Microsoft.EntityFrameworkCore;
+using EmployeeCRUD.Data;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
+app.Run();
+
+\\AppDbContext.cs\\
+using EmployeCRUD.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace EmployeeCRUD.Data
+{
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<Employee> Employees { get; set; }
+    }
+}
+
+\\Employee.cs\\
+namespace EmployeCRUD.Models
+{
+    public class Employee
+    {
+        public int Id {  get; set; }
+        public string Name { get; set; }
+        public double Salary { get; set; }
+    }
+}
+
+\\appsetting.json\\
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=EmployeeDB;Trusted_Connection=True;TrustServerCertificate=True",
+    "AppDbContext": "Server=(localdb)\\mssqllocaldb;Database=AppDbContext;Trusted_Connection=True;MultipleActiveResultSets=true"
+  }
+}
 
