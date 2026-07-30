@@ -1,0 +1,40 @@
+----------------------------------manifest.json-----------------------
+
+{
+  "name": "HTML to PWA",
+  "short_name": "HTp",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "icons/icon1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
+
+---------------------service-worker.js------------------------------
+
+self.addEventListener("install", e => {
+    console.log("Service workers Installed");
+});
+
+self.addEventListener("fetch", (event) => {
+    event.respondWith(fetch(event.request));
+});
+
+------------------------------------------------layout.cshtml-------------------------------
+<link rel="manifest" href="/manifest.json"/>
+<script>    
+    if('serviceWorker' in navigator){
+        navigator.serviceWorker.register('/service-worker.js')
+    }
+</script>
